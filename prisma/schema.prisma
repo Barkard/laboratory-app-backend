@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Appointment {
+  id_appointment          Int                       @id @default(autoincrement())
+  id_user                 Int
+  requested_date          DateTime
+  status                  String
+  user                    User                      @relation(fields: [id_user], references: [id_user])
+  exam_appointment_detail ExamAppointmentDetail[]
+
+  @@map("APPOINTMENT")
+}
+
+model CustomFiles {
+  id_file     Int    @id @default(autoincrement())
+  config_name String
+  json_schema String
+  exams       Exam[]
+
+  @@map("CUSTOM_FILES")
+}
+
+model Exam {
+  id_exam                 Int                       @id @default(autoincrement())
+  id_type                 Int
+  id_file                 Int
+  custom_files            CustomFiles               @relation(fields: [id_file], references: [id_file])
+  exam_type               ExamType                  @relation(fields: [id_type], references: [id_type])
+  exam_appointment_detail ExamAppointmentDetail[]
+
+  @@map("EXAM")
+}
+
+model ExamAppointmentDetail {
+  id_detail            Int         @id @default(autoincrement())
+  id_appointment       Int
+  id_exam              Int
+  patient_observations String?
+  appointment          Appointment @relation(fields: [id_appointment], references: [id_appointment])
+  exam                 Exam        @relation(fields: [id_exam], references: [id_exam])
+  result               Result?
+
+  @@map("EXAM_APPOINTMENT_DETAIL")
+}
+
+model ExamType {
+  id_type       Int    @id @default(autoincrement())
+  category_name String
+  detail        String
+  requirements  String?
+  exams         Exam[]
+
+  @@map("EXAM_TYPE")
+}
+
+model Result {
+  id_result               Int                     @id @default(autoincrement())
+  id_appointment_detail   Int                     @unique
+  delivery_date           DateTime
+  result_data             String?
+  exam_appointment_detail ExamAppointmentDetail @relation(fields: [id_appointment_detail], references: [id_detail])
+
+  @@map("RESULT")
+}
+
+model Role {
+  id_role Int    @id @default(autoincrement())
+  name    String
+  users   User[]
+
+  @@map("ROLE")
+}
+
+model User {
+  id_user     Int           @id @default(autoincrement())
+  uid         String        @unique
+  email       String        @unique
+  first_name  String
+  last_name   String
+  phone       String
+  id_role     Int           @default(3)
+  appointments Appointment[]
+  role        Role          @relation(fields: [id_role], references: [id_role])
+
+  @@map("USER")
+}
