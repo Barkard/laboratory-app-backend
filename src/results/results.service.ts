@@ -22,6 +22,7 @@ export class ResultsService {
                         exam: {
                             include: {
                                 exam_type: true,
+                                custom_files: true,
                             },
                         },
                         appointment: {
@@ -44,6 +45,7 @@ export class ResultsService {
                         exam: {
                             include: {
                                 exam_type: true,
+                                custom_files: true,
                             },
                         },
                         appointment: {
