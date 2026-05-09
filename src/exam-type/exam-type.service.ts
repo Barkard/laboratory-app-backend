@@ -3,32 +3,52 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ExamTypeService {
-    constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
-    create(data: { category_name: string; detail: string; requirements?: string }) {
-        return this.prisma.examType.create({ data });
-    }
+  create(data: {
+    category_name: string;
+    detail: string;
+    requirements?: string;
+    id_class?: number;
+  }) {
+    return this.prisma.examType.create({ data });
+  }
 
-    findAll() {
-        return this.prisma.examType.findMany();
-    }
+  findAll() {
+    return this.prisma.examType.findMany({
+      include: {
+        class_exam: true,
+      },
+    });
+  }
 
-    findOne(id: number) {
-        return this.prisma.examType.findUnique({
-            where: { id_type: id },
-        });
-    }
+  findOne(id: number) {
+    return this.prisma.examType.findUnique({
+      where: { id_type: id },
+      include: {
+        class_exam: true,
+      },
+    });
+  }
 
-    update(id: number, data: { category_name?: string; detail?: string; requirements?: string }) {
-        return this.prisma.examType.update({
-            where: { id_type: id },
-            data,
-        });
-    }
+  update(
+    id: number,
+    data: {
+      category_name?: string;
+      detail?: string;
+      requirements?: string;
+      id_class?: number;
+    },
+  ) {
+    return this.prisma.examType.update({
+      where: { id_type: id },
+      data,
+    });
+  }
 
-    remove(id: number) {
-        return this.prisma.examType.delete({
-            where: { id_type: id },
-        });
-    }
+  remove(id: number) {
+    return this.prisma.examType.delete({
+      where: { id_type: id },
+    });
+  }
 }

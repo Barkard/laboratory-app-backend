@@ -15,6 +15,7 @@ import { ExamAppointmentDetailsModule } from './exam-appointment-details/exam-ap
 import { ResultsModule } from './results/results.module';
 import { AuthModule } from './auth/auth.module';
 import { StatsModule } from './stats/stats.module';
+import { ClassExamModule } from './class-exam/class-exam.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { StatsModule } from './stats/stats.module';
     ResultsModule,
     AuthModule,
     StatsModule,
+    ClassExamModule,
   ],
   controllers: [AppController],
   providers: [AppService],

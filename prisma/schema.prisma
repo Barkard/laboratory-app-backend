@@ -7,11 +7,11 @@ datasource db {
 }
 
 model Appointment {
-  id_appointment          Int                       @id @default(autoincrement())
+  id_appointment          Int                     @id @default(autoincrement())
   id_user                 Int
   requested_date          DateTime
   status                  String
-  user                    User                      @relation(fields: [id_user], references: [id_user])
+  user                    User                    @relation(fields: [id_user], references: [id_user])
   exam_appointment_detail ExamAppointmentDetail[]
 
   @@map("APPOINTMENT")
@@ -27,11 +27,11 @@ model CustomFiles {
 }
 
 model Exam {
-  id_exam                 Int                       @id @default(autoincrement())
+  id_exam                 Int                     @id @default(autoincrement())
   id_type                 Int
   id_file                 Int
-  custom_files            CustomFiles               @relation(fields: [id_file], references: [id_file])
-  exam_type               ExamType                  @relation(fields: [id_type], references: [id_type])
+  custom_files            CustomFiles             @relation(fields: [id_file], references: [id_file])
+  exam_type               ExamType                @relation(fields: [id_type], references: [id_type])
   exam_appointment_detail ExamAppointmentDetail[]
 
   @@map("EXAM")
@@ -49,19 +49,29 @@ model ExamAppointmentDetail {
   @@map("EXAM_APPOINTMENT_DETAIL")
 }
 
+model ClassExam {
+  id_class   Int        @id @default(autoincrement())
+  class_name String
+  exam_types ExamType[]
+
+  @@map("CLASS_EXAM")
+}
+
 model ExamType {
-  id_type       Int    @id @default(autoincrement())
+  id_type       Int        @id @default(autoincrement())
   category_name String
   detail        String
   requirements  String?
+  id_class      Int?
   exams         Exam[]
+  class_exam    ClassExam? @relation(fields: [id_class], references: [id_class])
 
   @@map("EXAM_TYPE")
 }
 
 model Result {
-  id_result               Int                     @id @default(autoincrement())
-  id_appointment_detail   Int                     @unique
+  id_result               Int                   @id @default(autoincrement())
+  id_appointment_detail   Int                   @unique
   delivery_date           DateTime
   result_data             String?
   exam_appointment_detail ExamAppointmentDetail @relation(fields: [id_appointment_detail], references: [id_detail])
@@ -78,15 +88,15 @@ model Role {
 }
 
 model User {
-  id_user     Int           @id @default(autoincrement())
-  uid         String        @unique
-  email       String        @unique
-  first_name  String
-  last_name   String
-  phone       String
-  id_role     Int           @default(3)
+  id_user      Int           @id @default(autoincrement())
+  uid          String        @unique
+  email        String        @unique
+  first_name   String
+  last_name    String
+  phone        String
+  id_role      Int           @default(3)
   appointments Appointment[]
-  role        Role          @relation(fields: [id_role], references: [id_role])
+  role         Role          @relation(fields: [id_role], references: [id_role])
 
   @@map("USER")
 }
