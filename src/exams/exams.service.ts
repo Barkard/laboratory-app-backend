@@ -78,10 +78,53 @@ export class ExamsService {
     return this.prisma.exam.findUnique(query);
   }
 
-  update(id: number, data: { id_type?: number; id_file?: number }) {
-    return this.prisma.exam.update({
-      where: { id_exam: id },
-      data,
+  async update(id: number, data: {
+    id_type?: number;
+    id_file?: number;
+    exam_type_data?: { category_name: string; detail: string };
+    custom_file_data?: { config_name: string; json_schema: string };
+  }) {
+    return this.prisma.$transaction(async (tx) => {
+      // Update custom file (template) if supplied
+      if (data.custom_file_data) {
+        const exam = await tx.exam.findUnique({ where: { id_exam: id } });
+        if (exam) {
+          await tx.customFiles.update({
+            where: { id_file: exam.id_file },
+            data: data.custom_file_data,
+          });
+        }
+      }
+
+      // Update exam type if supplied
+      if (data.exam_type_data) {
+        const exam = await tx.exam.findUnique({ where: { id_exam: id } });
+        if (exam) {
+          await tx.examType.update({
+            where: { id_type: exam.id_type },
+            data: data.exam_type_data,
+          });
+        }
+      }
+
+      // Prepare connections for id_type / id_file if they are passed directly
+      const updateData: any = {};
+      if (data.id_type) updateData.exam_type = { connect: { id_type: data.id_type } };
+      if (data.id_file) updateData.custom_files = { connect: { id_file: data.id_file } };
+
+      if (Object.keys(updateData).length > 0) {
+        return tx.exam.update({
+          where: { id_exam: id },
+          data: updateData,
+          include: { exam_type: true, custom_files: true },
+        });
+      }
+
+      // No direct changes, just return the current exam with relations
+      return tx.exam.findUnique({
+        where: { id_exam: id },
+        include: { exam_type: true, custom_files: true },
+      });
     });
   }
 
