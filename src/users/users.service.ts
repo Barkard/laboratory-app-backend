@@ -61,7 +61,7 @@ export class UsersService {
 
 
     findByPhone(phone: string) {
-        return this.prisma.user.findUnique({
+        return this.prisma.user.findFirst({
             where: { phone },
             include: {
                 role: true,
