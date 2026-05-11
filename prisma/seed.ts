@@ -29,7 +29,7 @@ async function main() {
   // 2. Usuarios base (Admin)
   const users = [
     {
-      uid: 'AntonioSalasAdmin',
+      uid: '12345678',
       email: 'leon@gmail.com',
       first_name: 'Antonio',
       last_name: 'Salas',
