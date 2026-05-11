@@ -29,11 +29,11 @@ async function main() {
   // 2. Usuarios base (Admin)
   const users = [
     {
-      uid: '28169315',
+      uid: 'AntonioSalasAdmin',
       email: 'leon@gmail.com',
-      first_name: 'Leon',
-      last_name: 'Pineda',
-      phone: '04147417970',
+      first_name: 'Antonio',
+      last_name: 'Salas',
+      phone: '04141234567',
       id_role: 1,
     },
     {
