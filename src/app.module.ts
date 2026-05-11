@@ -16,6 +16,8 @@ import { ResultsModule } from './results/results.module';
 import { AuthModule } from './auth/auth.module';
 import { StatsModule } from './stats/stats.module';
 import { ClassExamModule } from './class-exam/class-exam.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { ClassExamModule } from './class-exam/class-exam.module';
     AuthModule,
     StatsModule,
     ClassExamModule,
+    NotificationsModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -88,15 +88,28 @@ model Role {
 }
 
 model User {
-  id_user      Int           @id @default(autoincrement())
-  uid          String        @unique
-  email        String        @unique
-  first_name   String
-  last_name    String
-  phone        String
-  id_role      Int           @default(3)
-  appointments Appointment[]
-  role         Role          @relation(fields: [id_role], references: [id_role])
+  id_user       Int            @id @default(autoincrement())
+  uid           String         @unique
+  email         String         @unique
+  first_name    String
+  last_name     String
+  phone         String
+  id_role       Int            @default(3)
+  appointments  Appointment[]
+  notifications Notification[]
+  role          Role           @relation(fields: [id_role], references: [id_role])
 
   @@map("USER")
+}
+
+model Notification {
+  id_notification Int      @id @default(autoincrement())
+  id_user         Int
+  title           String
+  message         String
+  read            Boolean  @default(false)
+  created_at      DateTime @default(now())
+  user            User     @relation(fields: [id_user], references: [id_user])
+
+  @@map("NOTIFICATION")
 }

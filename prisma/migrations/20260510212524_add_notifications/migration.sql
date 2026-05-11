@@ -1,0 +1,14 @@
+-- CreateTable
+CREATE TABLE "NOTIFICATION" (
+    "id_notification" SERIAL NOT NULL,
+    "id_user" INTEGER NOT NULL,
+    "title" TEXT NOT NULL,
+    "message" TEXT NOT NULL,
+    "read" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "NOTIFICATION_pkey" PRIMARY KEY ("id_notification")
+);
+
+-- AddForeignKey
+ALTER TABLE "NOTIFICATION" ADD CONSTRAINT "NOTIFICATION_id_user_fkey" FOREIGN KEY ("id_user") REFERENCES "USER"("id_user") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -10,6 +10,17 @@ export class AuthService {
         return { exists: !!user, user };
     }
 
+    async checkEmail(email: string) {
+        const user = await this.usersService.findByEmail(email);
+        return !!user;
+    }
+
+    async checkPhone(phone: string) {
+        const user = await this.usersService.findByPhone(phone);
+        return !!user;
+    }
+
+
     async register(data: {
         cedula: string;
         nombre: string;
@@ -17,11 +28,25 @@ export class AuthService {
         correo: string;
         telefono: string;
     }) {
-        // Check if user already exists
-        const existingUser = await this.usersService.findByUid(data.cedula);
-        if (existingUser) {
-            throw new ConflictException('El usuario ya existe');
+        // Check if user already exists by UID
+        const existingUserByUid = await this.usersService.findByUid(data.cedula);
+        if (existingUserByUid) {
+            throw new ConflictException('El usuario con esta cédula ya existe');
         }
+
+        // Check if email already exists
+        const existingUserByEmail = await this.usersService.findByEmail(data.correo);
+        if (existingUserByEmail) {
+            throw new ConflictException('El correo electrónico ya está en uso');
+        }
+
+        // Check if phone already exists
+        const existingUserByPhone = await this.usersService.findByPhone(data.telefono);
+        if (existingUserByPhone) {
+            throw new ConflictException('El número de teléfono ya está en uso');
+        }
+
+
 
         // Map to Prisma model fields
         return this.usersService.create({
@@ -30,7 +55,7 @@ export class AuthService {
             first_name: data.nombre,
             last_name: data.apellido,
             phone: data.telefono,
-            id_role: 2, // Assuming 2 is a default role (e.g. Patient/Regular User)
+            id_role: 3, // Role 3 is Patient
         });
     }
 }

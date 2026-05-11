@@ -14,9 +14,13 @@ export class UsersService {
         id_role?: number;
     }) {
         return this.prisma.user.create({
-            data,
+            data: {
+                ...data,
+                email: data.email.toLowerCase(),
+            },
         });
     }
+
 
     findAll() {
         return this.prisma.user.findMany({
@@ -45,6 +49,28 @@ export class UsersService {
         });
     }
 
+    findByEmail(email: string) {
+
+        return this.prisma.user.findUnique({
+            where: { email: email.toLowerCase() },
+            include: {
+                role: true,
+            },
+        });
+    }
+
+
+    findByPhone(phone: string) {
+        return this.prisma.user.findUnique({
+            where: { phone },
+            include: {
+                role: true,
+            },
+        });
+    }
+
+
+
     update(id: number, data: {
         email?: string;
         first_name?: string;
@@ -54,9 +80,13 @@ export class UsersService {
     }) {
         return this.prisma.user.update({
             where: { id_user: id },
-            data,
+            data: {
+                ...data,
+                email: data.email ? data.email.toLowerCase() : undefined,
+            },
         });
     }
+
 
     remove(id: number) {
         return this.prisma.user.delete({

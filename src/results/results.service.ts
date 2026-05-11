@@ -1,12 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import PDFDocument from 'pdfkit';
+import { NotificationsService } from '../notifications/notifications.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class ResultsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+    private mailService: MailService
+  ) {}
 
-  create(data: {
+  async create(data: {
     id_appointment_detail: number;
     delivery_date: string | Date;
     result_data?: string;
@@ -14,12 +20,61 @@ export class ResultsService {
     const date = new Date(data.delivery_date);
     const finalDate = isNaN(date.getTime()) ? new Date() : date;
 
-    return this.prisma.result.create({
+    const result = await this.prisma.result.create({
       data: {
         ...data,
         delivery_date: finalDate,
       },
+      include: {
+        exam_appointment_detail: {
+            include: {
+                appointment: {
+                    include: {
+                        user: true
+                    }
+                },
+                exam: {
+                    include: {
+                        exam_type: true
+                    }
+                }
+            }
+        }
+      }
     });
+
+    const patient = result.exam_appointment_detail.appointment.user;
+    const examName = result.exam_appointment_detail.exam.exam_type.category_name;
+
+    // Notify Patient
+    await this.notificationsService.create({
+        id_user: patient.id_user,
+        title: 'Resultados Listos',
+        message: `Los resultados de tu examen de ${examName} ya están disponibles en el portal.`
+    });
+
+    // Generate PDF for attachment
+    let attachments: any[] = [];
+    try {
+        const pdfBuffer = await this.generatePDF(result.id_result);
+        attachments.push({
+            filename: `resultado_${examName.replace(/\s+/g, '_')}.pdf`,
+            content: pdfBuffer,
+        });
+    } catch (pdfError) {
+        console.error('Error generating PDF for email attachment:', pdfError);
+    }
+
+    // Send Email with PDF
+    await this.mailService.sendMail(
+        patient.email,
+        'Tus resultados de laboratorio están listos',
+        `Hola ${patient.first_name}, los resultados de tu examen de ${examName} ya están disponibles. Te adjuntamos el reporte en PDF.`,
+        `<h1>Hola ${patient.first_name}</h1><p>Los resultados de tu examen de <strong>${examName}</strong> ya están disponibles.</p><p>Te adjuntamos el reporte en PDF.</p>`,
+        attachments
+    );
+
+    return result;
   }
 
   findAll() {

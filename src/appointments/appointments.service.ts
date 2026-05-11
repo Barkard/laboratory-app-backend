@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AppointmentsService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private notificationsService: NotificationsService
+    ) { }
 
     async create(data: { id_user: number; requested_date: string | Date; status: string; exam_ids?: number[]; observations?: string }) {
         const { exam_ids, observations, ...appointmentData } = data;
@@ -26,7 +30,7 @@ export class AppointmentsService {
                 });
             }
 
-            return tx.appointment.findUnique({
+            const fullAppointment = await tx.appointment.findUnique({
                 where: { id_appointment: appointment.id_appointment },
                 include: {
                     user: true,
@@ -35,6 +39,30 @@ export class AppointmentsService {
                     },
                 },
             });
+
+            if (!fullAppointment) {
+                throw new Error('Appointment not found after creation');
+            }
+
+
+            // Notify Admins and Supervisors
+            if (fullAppointment) {
+                const admins = await tx.user.findMany({
+                    where: { id_role: { in: [1, 2] } }
+                });
+
+                for (const admin of admins) {
+                    await tx.notification.create({
+                        data: {
+                            id_user: admin.id_user,
+                            title: 'Nueva Solicitud de Cita',
+                            message: `El paciente ${fullAppointment.user.first_name} ${fullAppointment.user.last_name} ha solicitado una cita.`
+                        }
+                    });
+                }
+            }
+
+            return fullAppointment;
         });
     }
 
